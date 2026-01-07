@@ -1,0 +1,393 @@
+Spiegazione codice: 
+
+librerie utilizzate: 
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+using namespace std;
+
+------------------------------------------------------------------------
+
+#include <iostream>
+serve per cout, cin, endl
+
+#include <string>
+serve per string 
+
+#include <ctime>
+serve per time(0) 
+
+
+#include <cstdlib>
+serve per rand(), srand()
+
+
+using namespace std;
+evita di scrivere std::cout, std::cin, std::string
+
+
+---------------------------------------------------------------------------
+
+
+FUNZIONI: 
+
+void regoleDiBenvenuto() 
+-------------------
+è la funzione iniziale per dare il benvenuto al giocatore, e dove vengono specificate prevemente le regole del Blackjack. 
+
+
+int Ngiocatori()
+-------------------
+chiede il numeri di giocatori finchè non è valdo (si gioca massimo in 7, se non c'è nessun giocatore non può iniziare la partita)
+
+
+
+void creaMazzo(string semiCarte[], int valoriCarte[], int puntiCarte[])
+-------------------
+
+si passano 3 array paralleli (Si usano array paralleli perché ogni carta è identificata da un unico indice, che permette di collegare seme, valore e punti): 
+
+semiCarte[52]
+valoriCarte[52]
+puntiCarte[52]
+si trovano nel main
+
+tutti gli array hanno 52 elementi e l'indice rappresenta la sessa carta. 
+esempio: 
+semiCarte[0]   = "Cuori"
+valoriCarte[0]= 1
+puntiCarte[0] = 11
+
+
+
+string semi[4] = { "Cuori", "Quadri", "Fiori", "Picche" };
+int valori[13] = { 1,2,3,...13 };
+int punti[13] = { 11,2,3,...10 };
+
+1 = asso --> 11 punti iniziali
+11,12,13 --> figure --> 10 punti
+
+variabile: 
+int temp = 0; serve come indice del mazzo finale (0-51), serve per sapere in quale posizione inserire la prossima carta. 
+
+due cicli for: 
+for (int i = 0; i < 4; i++) {          // semi
+    for (int v = 0; v < 13; v++) {     // valori
+
+Ciclo esterno (i) → scorre i semi (4)
+
+Ciclo interno (v) → scorre i valori (13)
+
+
+Creazione della carta vera e propria: 
+
+semiCarte[temp]   = semi[i];
+valoriCarte[temp] = valori[v];
+puntiCarte[temp]  = punti[v];
+
+
+qui dico: 
+la carta numero temp ha 
+questo seme
+questo valore
+questi punti
+subito dopo temp++ (passo alla carta successiva del mazzo) 
+
+
+
+void DareSoldi(int soldi[], int numGiocatori)
+------------------------
+
+inizializza i soldi; 
+ogni giocatore parte con x soldi; 
+
+soldi[i] = 1000;
+
+
+
+void Puntate(int soldi[], int puntate[], int numGiocatori)
+---------------------------
+
+
+for (int i = 0; i < numGiocatori; i++)
+
+questo for fa = Ripeti la procedura di puntata per ogni giocatore
+
+
+Controllo: il giocatore ha soldi? 
+if (soldi[i] <= 0) {
+    cout << "il giocatore " << i + 1 << " e senza soldi, non può giocare " << endl; 
+
+    puntate[i] = 0;
+    continue; 
+}
+
+
+Se un giocatore ha 0 o meno soldi non può puntare
+
+La sua puntata viene messa a 0
+
+continue → salta tutto il resto e passa al prossimo giocatore
+
+
+
+do {
+    cout << "Giocatore " << i + 1 
+         << " (soldi: " << soldi[i] << "$), quanto vuoi puntare? ";
+    cin >> puntata;
+
+chiede la puntata e la legge da tastiera
+
+
+
+if (puntata < 1 || puntata > soldi[i]) {
+    cout << " Puntata non valida" << endl; 
+}
+
+
+La puntata è non valida se:
+
+è minore di 1
+
+è maggiore dei soldi disponibili
+
+
+
+SALVATAGGIO PUNTATA:
+puntate[i] = puntata;
+
+
+Alla fine della funzione ogni elemento dell’array puntate contiene la puntata del rispettivo giocatore.
+
+
+
+
+void turnoGiocatore(string semiCarte[], int valoriCarte[], int puntiCarte[], int numGiocatori, bool cartaUscita[],int punteggiGiocatori[], int puntate[]) 
+
+------------------------------------------
+L’array cartaUscita serve a simulare un mazzo reale, evitando che la stessa carta venga pescata più volte.
+
+Se la puntata è uguale a 0, il giocatore non partecipa al turno, il suo punteggio viene messo a 0 e si passa al giocatore successivo.
+
+
+
+for (int i = 0; i < numGiocatori; i++) {
+
+Tutto quello che segue vale per un giocatore alla volta
+
+
+
+controllo per vedere se il giocatore può giocare
+
+if (puntate[i] == 0) {
+    punteggiGiocatori[i] = 0;
+    continue;
+}
+
+Puntata = 0 → niente soldi → niente turno
+
+Punteggio messo a 0
+
+continue → passa al giocatore dopo
+
+
+Pesca delle prime due carte
+for (int c = 0; c < 2; c++) {
+
+
+Estrazione carta casuale
+int carta;
+do {
+    carta = rand() % 52;
+} while (cartaUscita[carta]);
+
+
+rand() % 52 → numero tra 0 e 51
+
+se la carta è già uscita → ripeti
+
+
+
+cartaUscita[carta] = true; // serve per segnare la carta come usata cosi non viene ripescata
+
+
+Salvo la carta e stampo il valore con il seme
+
+cartePescate[c] = carta;
+cout << valoriCarte[carta] << " di " << semiCarte[carta] << endl;
+
+
+Calcolo punteggio iniziale 
+
+for (int c = 0; c < 2; c++) {
+
+
+Se è un asso, aggiungie 11, conta l'asso
+
+if (valoriCarte[carta] == 1) {
+    punteggio += 11;
+    assi++;
+}
+
+
+else {
+    punteggio += puntiCarte[carta];
+}
+
+
+Sistema gli assi se fanno sballare 
+
+while (punteggio > 21 && assi > 0) {
+    punteggio -= 10;
+    assi--;
+}
+
+
+
+
+int turnoBanco(string semiCarte[], int valoriCarte[], int puntiCarte[], bool cartaUscita[])
+
+---------------------------------------------------------
+La funzione ritorna il punteggio finale del banco perché serve per confrontarlo con i punteggi dei giocatori.
+
+Pesca prime due carte
+
+for (int c = 0; c < 2; c++) {
+
+
+Pesca carte casuali 
+
+int carta;
+do {
+    carta = rand() % 52;
+} while (cartaUscita[carta]);
+
+cartaUscita[carta] = true; // segna carta come uscita
+
+
+
+Aggiorna il punteggio (stessa logica del giocatore) 
+
+if (valoriCarte[carta] == 1) {
+    punteggio += 11;
+    assi++;
+}
+else {
+    punteggio += puntiCarte[carta];
+}
+
+
+sistema gli assi se sballa (stessa logica del giocatore) 
+
+
+while (punteggio > 21 && assi > 0) {
+    punteggio -= 10;
+    assi--;
+}
+
+
+Controllo Blackjack con due carte (se il banco lo fa finisce subito, ritorna il punteggio) 
+
+
+if (punteggio == 21) {
+    cout << "Il banco fa Blackjack" << punteggio << endl;
+    return punteggio;
+}
+
+
+Regola del banco: continua a pescare carte finché il punteggio è minore di 17
+
+while (punteggio < 17) {
+
+//questa parte è uguale a prima dove pesca casualmente e segna la carta se è già uscita
+
+
+//dopo fa la stessa cosa di prima aggiorna il punteggio e usa lo stesso sistema per controllore se l'asso sballa 
+
+
+Controllo se ha sballato 
+
+if (punteggio > 21) {
+    cout << "Il banco ha sballato" << endl;
+}
+
+
+
+void confrontoBancoGiocatori(int punteggiGiocatori[], int soldi[], int puntate[], int numGiocatori, int punteggioBanco)
+
+
+---------------------------------------------------------
+
+
+Tutto ciò che segue vale per un giocatore alla volta.
+
+for (int i = 0; i < numGiocatori; i++) {
+
+
+Controllo se il giocatore ha giocato
+
+if (puntate[i] == 0) continue;
+
+se puntata = 0
+→ il giocatore non ha giocato
+→ salta tutto
+
+
+
+CASI POSSIBILI: 
+
+Giocatore sballa
+
+if (punteggiGiocatori[i] > 21) {
+    cout << "ha sballato, perde." << endl;
+    soldi[i] -= puntate[i];
+}
+
+se sballa perde sempre anche se il banco sballa
+
+
+2. Banco sballa 
+
+else if (punteggioBanco > 21) {
+    cout << "vince (il banco ha sballato)." << endl;
+    soldi[i] += puntate[i];
+}
+
+
+se il banco sballa, vincono tutti i giocatori rimasti validi
+
+
+3. Giocatore batte il banco
+
+else if (punteggiGiocatori[i] > punteggioBanco) {
+    cout << "vince." << endl;
+    soldi[i] += puntate[i];
+}
+
+
+4. Banco batte il giocatore
+
+else if (punteggiGiocatori[i] < punteggioBanco) {
+    cout << "perde." << endl;
+    soldi[i] -= puntate[i];
+}
+
+
+5. Pareggio 
+
+else {
+    cout << "pareggio." << endl;
+}
+
+stessi punti, i soldi puntati dai giocatori non cambiano
+
+
+
+
+
+
+
+
+
+
